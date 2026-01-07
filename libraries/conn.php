@@ -1,4 +1,5 @@
 <?php
+#Connection to database
 $host='localhost';
 require_once "dbpassagg.php";
 $port=$DB_PORT;

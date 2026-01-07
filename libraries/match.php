@@ -23,7 +23,7 @@ function findMatch(){
         $user1 = mysqli_fetch_assoc($result)['userinQ'];
         $user2 = mysqli_fetch_assoc($result)['userinQ'];
         $gameid=creategame($user1, $user2);
-        $stmt = $mysqli->prepare("DELETE FROM gameQUEUE WHERE userinQ = ? AND userinQ = ?");
+        $stmt = $mysqli->prepare("DELETE FROM gameQUEUE WHERE userinQ = ? OR userinQ = ?");
         $stmt->bind_param("ss", $user1, $user2);
         $stmt->execute();
         return[

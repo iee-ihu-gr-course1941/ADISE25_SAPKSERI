@@ -22,7 +22,7 @@ switch($method){
                             echo json_encode($data);
                         }else {
                             http_response_code(400);
-                            echo json_encode(['error' => 'Missing game id']);
+                            echo json_encode(['error' => 'Missing game id to get game']);
                         }
                         break;
                     case 'cardsofplayers':
@@ -31,7 +31,7 @@ switch($method){
                             echo json_encode($data);
                         }else {
                             http_response_code(400);
-                            echo json_encode(['error' => 'Missing users ids']);
+                            echo json_encode(['error' => 'Missing users ids to get cards of player']);
                         }
                         break;
                     case 'singlecard':
@@ -40,7 +40,7 @@ switch($method){
                             echo json_encode($data);
                         }else {
                             http_response_code(400);
-                            echo json_encode(['error' => 'Missing users ids']);
+                            echo json_encode(['error' => 'Missing users ids to get single card']);
                         }
                         break;
                     case 'board':
@@ -49,7 +49,7 @@ switch($method){
                             echo json_encode($data);
                         }else {
                             http_response_code(400);
-                            echo json_encode(['error' => 'Missing game ids']);
+                            echo json_encode(['error' => 'Missing game id to get the board']);
                         }
                         break;
                     case 'turn':
@@ -58,7 +58,7 @@ switch($method){
                             echo json_encode($data);
                         }else {
                             http_response_code(400);
-                            echo json_encode(['error' => 'Missing game id']);
+                            echo json_encode(['error' => 'Missing game id to learn whos turn it is']);
                         }
                         break;
                     case 'ID':
@@ -67,16 +67,16 @@ switch($method){
                             echo json_encode($data);
                         }else {
                             http_response_code(400);
-                            echo json_encode(['error' => 'Missing game id']);
+                            echo json_encode(['error' => 'Missing usres ids to get game id #1']);
                         }
                         break;
-                    case 'pointcards':
+                    case 'gamepoints':
                         if(isset($input['userid'])){
                             $data = getgamepoints($input['userid']);
                             echo json_encode($data);
                         }else {
                             http_response_code(400);
-                            echo json_encode(['error' => 'Missing game id']);
+                            echo json_encode(['error' => 'Missing user id to get game points']);
                         }
                         break;
                 }
@@ -89,7 +89,7 @@ switch($method){
                             echo json_encode($data);
                         }else {
                             http_response_code(400);
-                            echo json_encode(['error' => 'Missing game id']);
+                            echo json_encode(['error' => 'Missing user id to get in_game_state']);
                         }
                         break;
                     case 'username':
@@ -98,7 +98,7 @@ switch($method){
                             echo json_encode($data);
                         }else {
                             http_response_code(400);
-                            echo json_encode(['error' => 'Missing game id']);
+                            echo json_encode(['error' => 'Missing user id to get username']);
                         }
                         break;
                     case 'points':
@@ -107,7 +107,7 @@ switch($method){
                             echo json_encode($data);
                         }else {
                             http_response_code(400);
-                            echo json_encode(['error' => 'Missing game id']);
+                            echo json_encode(['error' => 'Missing user id to get points']);
                         }
                         break;
                     case 'gameid':
@@ -116,7 +116,7 @@ switch($method){
                             echo json_encode($data);
                         }else {
                             http_response_code(400);
-                            echo json_encode(['error' => 'Missing game id']);
+                            echo json_encode(['error' => 'Missing user id to get game id#2']);
                         }
                         break;
                 }
@@ -133,7 +133,7 @@ switch($method){
                             echo json_encode($data);
                         }else {
                             http_response_code(400);
-                            echo json_encode(['error' => 'Missing users ids']);
+                            echo json_encode(['error' => 'Missing users ids to create game']);
                         }
                         break;
                     case 'reset':
@@ -142,7 +142,7 @@ switch($method){
                             echo json_encode($data);
                         }else {
                             http_response_code(400);
-                            echo json_encode(['error' => 'Missing users ids and game id']);
+                            echo json_encode(['error' => 'Missing users ids and game id to reset game']);
                         }
                         break;
                     case 'firstshare':
@@ -155,7 +155,7 @@ switch($method){
                             echo json_encode($data);
                         }else {
                             http_response_code(400);
-                            echo json_encode(['error' => 'Missing users ids and game id']);
+                            echo json_encode(['error' => 'Missing gameid and number, to throw card']);
                         }
                         break;
                     case 'calculatepoints':
@@ -164,7 +164,7 @@ switch($method){
                             echo json_encode($data);
                         }else {
                             http_response_code(400);
-                            echo json_encode(['error' => 'Missing users ids and game id']);
+                            echo json_encode(['error' => 'Missing users id to calculate points']);
                         }
                         break;
                     case 'roundshare':
@@ -173,7 +173,16 @@ switch($method){
                             echo json_encode($data);
                         }else {
                             http_response_code(400);
-                            echo json_encode(['error' => 'Missing users ids and game id']);
+                            echo json_encode(['error' => 'Missing game id to share cards']);
+                        }
+                        break;
+                    case 'finishgame':
+                        if(isset($input['gameid'])){
+                            $data=finishgame($input['gameid']);
+                            echo json_encode($data);
+                        }else {
+                            http_response_code(400);
+                            echo json_encode(['error' => 'Missing game id to share cards']);
                         }
                         break;
                 } 
@@ -186,7 +195,7 @@ switch($method){
                             echo json_encode($data);
                         }else {
                             http_response_code(400);
-                            echo json_encode(['error' => 'Missing users ids and game id']);
+                            echo json_encode(['error' => 'Missing users id to queue the user']);
                         }
                         break; 
                     case 'find':
@@ -202,7 +211,7 @@ switch($method){
                             echo json_encode($data);
                         }else {
                             http_response_code(400);
-                            echo json_encode(['error' => 'Missing users ids and game id']);
+                            echo json_encode(['error' => 'Missing users id and password to create user']);
                         }
                         break; 
                 }
@@ -212,13 +221,13 @@ switch($method){
         switch($request[0]){
             case 'game':
                 switch($request[1]){
-                    case 'delete':
+                    case 'end':
                         if(isset($input['gameid'])){
                             $data=endgame($input['gameid']);
                             echo json_encode($data);
                         }else {
                             http_response_code(400);
-                            echo json_encode(['error' => 'Missing game id']);
+                            echo json_encode(['error' => 'Missing game id to end game']);
                         }
                         break;
                 }
@@ -231,7 +240,7 @@ switch($method){
                             echo json_encode($data);
                         }else {
                             http_response_code(400);
-                            echo json_encode(['error' => 'Missing users ids and game id']);
+                            echo json_encode(['error' => 'Missing users ids and game id to delete user']);
                         }
                         break; 
                 }
@@ -247,7 +256,7 @@ switch($method){
                             echo json_encode($data);
                         }else {
                             http_response_code(400);
-                            echo json_encode(['error' => 'Missing everything']);
+                            echo json_encode(['error' => 'Missing everything to update game']);
                         }
                         break;
                     case 'updategamepoints':
@@ -256,7 +265,7 @@ switch($method){
                             echo json_encode($data);
                         }else {
                             http_response_code(400);
-                            echo json_encode(['error' => 'Missing everything']);
+                            echo json_encode(['error' => 'Missing everything to update game points']);
                         }
                         break;
                 }

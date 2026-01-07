@@ -9,7 +9,7 @@ function createuser($username,$pword){
     $st->bind_param("sss", $userid,$username, $pword);
     $st->execute();
     return [
-        "status" => "success" ,
+        "status" => "successfully created user" ,
         "userid"=>$userid
     ];
 }

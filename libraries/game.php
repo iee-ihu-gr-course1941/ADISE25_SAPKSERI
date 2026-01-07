@@ -1,6 +1,6 @@
 <?php 
 require_once "conn.php"; 
-
+require "user.php";
 #CREATE/RESET/END/UPDATE    
 
 function creategame($usr1, $usr2){
@@ -12,8 +12,6 @@ function creategame($usr1, $usr2){
     $boardcards=$cardshsare["boardofcards"];
     $userid1=$usr1;
     $userid2=$usr2;
-    $pointcards=file_get_contents('pointcards.json');
-    $pointcards=json_encode($pointcards);
     $in_game_state=1;
     $gameid = uniqid();
     $sql = "INSERT INTO game (gameid, p1, p2, turn, deckofcards, boardofcards) VALUES (?, ?, ?, ?, ?, ?);";
@@ -38,6 +36,34 @@ function resetgame($gameid, $usr1, $usr2){
     return[
         "gameid"=>creategame($usr1,$usr2),
         "status"=>"game reseted"
+    ];
+}
+
+function finishgame($gameid){
+    global $mysqli;
+    $gamedata=getgame($gameid);
+    $user1=$gamedata['p1'];
+    $user2=$gamedata['p2'];
+    $points1=getgamepoints($user1)["gamepoints"];
+    $points2=getgamepoints($user2)["gamepoints"];
+    if($points1>$points2){
+        $winner=$user1;
+    }elseif($points2>$points1){
+        $winner=$user2;
+    }else{$winner="TIE";}
+    $pointsOAL=getpoints($winner)["points"]+20;
+    $sql = "UPDATE user SET points = ? WHERE Userid = ?;";
+    $st = $mysqli->prepare($sql);
+    $st->bind_param("is", $pointsOAL, $winner);
+    $st->execute();
+    $log_id=uniqid();
+    $sql = "INSERT INTO log_game_file (log_id, game_id, user_1_id, user_1_score, user_2_id, user_2_score, winner) VALUES (?, ?, ?, ?, ?, ?, ?);";
+    $st = $mysqli->prepare($sql);
+    $st->bind_param("sssisis", $log_id, $gameid, $user1, $points1, $user2, $points2, $winner);
+    $st->execute();
+    return [
+        "status" => "successfully finished game" ,
+        "winner"=>$winner
     ];
 }
 
@@ -70,8 +96,9 @@ function updategame($gameid, $cards, $turn, $boardcards, $gamepoints,$userid,$ca
 
 function updategamepoints($userid,$gamepoints){
     global $mysqli;
-    $sql="UPDATE user SET gamepoints='$$gamepoints' WHERE Userid=$userid";
+    $sql="UPDATE user SET gamepoints=? WHERE Userid=?";
     $st = $mysqli->prepare($sql);
+    $st->bind_param("is", $gamepoints,$userid);
 	$st->execute();
     return[
         "status"=>"succesfully updated the gamepoints"
@@ -189,7 +216,7 @@ function getcardsgathered($userid){
 
 #GAME MECHANICS
 function check($card, $cardonboard){
-    if($cardonboard!==NULL){    
+    if(!empty($cardonboard)){    
         if($card['value']==11){
             return true;}
         if($card['suit']==$cardonboard['suit'] || $card['value']==$cardonboard['value']){
@@ -201,13 +228,16 @@ function check($card, $cardonboard){
 
 function check2($gameid){
     $gamedata=getgame($gameid);
-    $board=json_encode($gamedata["boardofcards"]);
-    $deck=json_encode($gamedata["deckofcards"]);
-    $pointcards1=json_encode($gamedata["p1"]);
-    $pointcards2=json_encode($gamedata["p2"]);
-    if(empty($pointcards1) && empty($pointcards2) && empty($deck) && !empty($board)){
+    $deck=json_decode($gamedata["deckofcards"],true);
+    $carddata1=getcardsofplayer($gamedata["p1"]);
+    $pointcards1=json_decode($carddata1["numberofcards"],true);
+    $carddata2=getcardsofplayer($gamedata["p2"]);
+    $pointcards2=json_decode($carddata2["numberofcards"],true);
+    if(($pointcards1==0) && ($pointcards2==0) && (count($deck)==0)){
         return true;
-    }else false;
+    }else {
+        return false;
+    }
 }
 
 function sharecards(){
@@ -258,7 +288,7 @@ function throwcard($gameid, $cardNumber){
     $card=$card['card'];
     $cardsgathered=getcardsgathered($turn)["cardsgathered"];
     #really important
-    if($boardcards !== NULL){
+    if(!empty($boardcards)){
         $cardonboard=$boardcards[0];
     }else{
         $cardonboard=[];
@@ -271,9 +301,9 @@ function throwcard($gameid, $cardNumber){
         }
     }
     if (check($card, $cardonboard)){
-        if(count($boardcards)==1){
+        if(count($boardcards)==1 ){
             for ($i=0; $i<count($pcards);$i++){
-                if($card==$pcards[$i]){
+                if($card==$pcards[$i] && !empty($boardcards)){
                     if($card['value']==11 && $boardcards['value']==11){
                         #20 points 
                         $cardsgathered=$cardsgathered+2;
@@ -297,23 +327,32 @@ function throwcard($gameid, $cardNumber){
     }
     else{
         array_push($boardcards, $card);
-        if(empty($pcardsE)){
-            if(check2($gameid)){
-                $gamepoints=$gamepoints+calculatepoints($boardcards)["points"];
-                calcplus3($gameid);
-                $boardcards=[];
-            }
-        }
     }
+    $wegotin="no";
     $boardcards=json_encode($boardcards);
     $pcards=json_encode($pcardsE);
     if($p1==$turn){
         updategame($gameid, $pcards, $p2, $boardcards, $gamepoints, $p1,$cardsgathered);
     }elseif($p2==$turn){
         updategame($gameid, $pcards, $p1, $boardcards, $gamepoints, $p2,$cardsgathered);
-    } 
+    }
+    if(check2($gameid)){
+        $wegotin="we got in";
+        $boardcards=json_decode($boardcards,true);
+        $gamepoints=$gamepoints+calculatepoints($boardcards)["points"];
+        $cardsgathered=$cardsgathered+count($boardcards);
+        calcplus3($gameid);
+        $boardcards=[];
+        $boardcards=json_encode($boardcards);
+        if($p1==$turn){
+            updategame($gameid, $pcards, $p2, $boardcards, $gamepoints, $p1,$cardsgathered);
+        }elseif($p2==$turn){
+            updategame($gameid, $pcards, $p1, $boardcards, $gamepoints, $p2,$cardsgathered);
+        }
+    }
     return[
-        "status"=>"success"
+        "status"=>"successfully threw card",
+        "wegotin"=>$wegotin
     ];
 }
 
