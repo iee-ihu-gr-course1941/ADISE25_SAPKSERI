@@ -5,10 +5,9 @@ require_once "libraries/dbpassagg.php";
 require_once "libraries/game.php";
 require_once "libraries/match.php";
 require_once "libraries/user.php";
-#require_once "lib/us.php";
 # CHECK check() once again, do we need it ???
 header('Content-Type: application/json');
-$method=$_REQUEST['REQUEST_METHOD'];
+$method=$_SERVER['REQUEST_METHOD'];
 $path_info = isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : '';
 $request = explode('/', trim($path_info, '/'));
 $input = json_decode(file_get_contents('php://input'), true);
@@ -29,6 +28,15 @@ switch($method){
                     case 'cardsofplayers':
                         if(isset($input['userid'])){
                             $data = getcardsofplayer($input['userid']);
+                            echo json_encode($data);
+                        }else {
+                            http_response_code(400);
+                            echo json_encode(['error' => 'Missing users ids']);
+                        }
+                        break;
+                    case 'singlecard':
+                        if(isset($input['userid']) && isset($input['number'])){
+                            $data = getsinglecard($input['userid'], $input['number']);
                             echo json_encode($data);
                         }else {
                             http_response_code(400);
@@ -64,7 +72,7 @@ switch($method){
                         break;
                     case 'pointcards':
                         if(isset($input['userid'])){
-                            $data = getpointcards($input['userid']);
+                            $data = getgamepoints($input['userid']);
                             echo json_encode($data);
                         }else {
                             http_response_code(400);
@@ -142,8 +150,8 @@ switch($method){
                         echo json_encode($data);
                         break;
                     case 'throwcard':
-                        if(isset($input['gameid']) && isset($input['card'])){
-                            $data=throwcard($input['gameid'],$input['card']);
+                        if(isset($input['gameid']) && isset($input['number'])){
+                            $data=throwcard($input['gameid'],$input['number']);
                             echo json_encode($data);
                         }else {
                             http_response_code(400);
@@ -234,8 +242,17 @@ switch($method){
             case 'game':
                 switch($request[1]){
                     case 'update':
-                        if(isset($input['gameid']) && isset($input['cards']) && isset($input['turn'])&& isset($input['boardcards'])&& isset($input['pointcards'])&& isset($input['userid'])){
-                            $data = updategame($input['gameid'], $input['cards'],$input['boardcards'],$input['pointcards'],$input['userid']);
+                        if(isset($input['gameid']) && isset($input['cards']) && isset($input['turn'])&& isset($input['boardcards'])&& isset($input['gamepoints'])&& isset($input['userid'])){
+                            $data = updategame($input['gameid'], $input['cards'],$input['boardcards'],$input['gamepoints'],$input['userid']);
+                            echo json_encode($data);
+                        }else {
+                            http_response_code(400);
+                            echo json_encode(['error' => 'Missing everything']);
+                        }
+                        break;
+                    case 'updategamepoints':
+                        if(isset($input['userid']) && isset($input['gamepoints'])){
+                            $data = updategamepoints($input['userid'], $input['gamepoints']);
                             echo json_encode($data);
                         }else {
                             http_response_code(400);

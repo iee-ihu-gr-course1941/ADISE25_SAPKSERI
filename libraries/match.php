@@ -2,25 +2,29 @@
 #matchmaking
 function inqueue($userid){
     global $mysqli;
-    $sql="INSERT INTO gameQUEUE (usersinQ) 
-          VALUES ($userid);";
+    $sql="INSERT INTO gameQUEUE (userinQ) 
+          VALUES (?);";
     $st = $mysqli->prepare($sql);
+    $st->bind_param("s", $userid);
 	$st->execute();
+    $match=findMatch();
     return[
-        "status"=>"User is succesfully in queue for a game"
+        "status"=>"User is succesfully in queue for a game",
+        "status2"=>$match["status"],
+        "gameid"=>$match["gameid"]
     ];
 }
 
 function findMatch(){
     global $mysqli;
-    $sql="SELECT usersinQ FROM gameQUEUE ORDER BY timestamp ASC LIMIT 2";
+    $sql="SELECT userinQ FROM gameQUEUE ORDER BY timestamp ASC LIMIT 2";
     $result = mysqli_query($mysqli, $sql);
     if(mysqli_num_rows($result) == 2) {
-        $user1 = mysqli_fetch_assoc($result)['userid'];
-        $user2 = mysqli_fetch_assoc($result)['userid'];
+        $user1 = mysqli_fetch_assoc($result)['userinQ'];
+        $user2 = mysqli_fetch_assoc($result)['userinQ'];
         $gameid=creategame($user1, $user2);
-        $stmt = $mysqli->prepare("DELETE FROM gameQUEUE WHERE userid = ? OR userid = ?");
-        $stmt->bind_param("ii", $user1, $user2);
+        $stmt = $mysqli->prepare("DELETE FROM gameQUEUE WHERE userinQ = ? AND userinQ = ?");
+        $stmt->bind_param("ss", $user1, $user2);
         $stmt->execute();
         return[
             "status"=>"Game Created! Entering Game.....",
@@ -28,7 +32,8 @@ function findMatch(){
         ];
     }
     return[
-        "status"=>"Waiting for player..."
+        "status"=>"Waiting for player...",
+        "gameid"=>NULL
     ];
 }
 ?>

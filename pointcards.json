@@ -1,9 +1,4 @@
 {
-    "kseres": [
-        {   
-            "value":0
-        }
-    ],
-    "normalcards":[
-    ]
+    "keres": {"value":0},
+    "noarmalcards":{}
 }
