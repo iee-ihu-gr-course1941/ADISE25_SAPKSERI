@@ -77,4 +77,47 @@ function getUsersGameID($userid){
         "gameid" => $row['gameid'] 
     ];   
 }
+
+function getuserStats($userid){
+    global $mysqli;
+    $sql = "SELECT username, in_game_state, points FROM user WHERE Userid=? ";
+    $st = $mysqli->prepare($sql);
+    $st->bind_param("i", $userid);
+    $st->execute();
+    $result = $st->get_result();
+    $row = $result->fetch_assoc();  
+    return [
+        "username" => $row['username'],
+        "in_game_state" => $row['in_game_state'],
+        "points"=>$row['points']
+    ];
+}
+
+function getuserHistory($userid){
+    #check if we are goint to do it
+}
+
+function checkCredentials($username, $password){
+    global $mysqli;
+    $sql="SELECT Userid, pword FROM user WHERE username=?";
+    if($st=$mysqli->prepare($sql)){
+        $st->bind_param("s",$username);
+        $st->execute();
+        $result=$st->get_result();
+        $row=$result->fetch_assoc();
+        if($row && $row['pword']===$password){
+            $user=getuserStats($row["Userid"]);
+            return [
+                "status"=>true,
+                "userid"=>$row["Userid"],
+                "username" => $user['username'],
+                "in_game_state" => $user['in_game_state'],
+                "points"=>$user['points']
+            ];
+        }
+    }
+    return [
+        "status"=>false
+    ];
+}
 ?>

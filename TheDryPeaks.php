@@ -119,6 +119,24 @@ switch($method){
                             echo json_encode(['error' => 'Missing user id to get game id#2']);
                         }
                         break;
+                    case 'userstats':
+                        if(isset($input['userid'])){
+                            $data = getuserStats($input['userid']);
+                            echo json_encode($data);
+                        }else {
+                            http_response_code(400);
+                            echo json_encode(['error' => 'Missing user id to get game id#2']);
+                        }
+                        break;
+                    case 'checkCred':
+                        if(isset($input['username']) && isset($input['password'])){
+                            $data = checkCredentials($input['username'],$input['password']);
+                            echo json_encode($data);
+                        }else {
+                            http_response_code(400);
+                            echo json_encode(['error' => 'Missing user id to get game id#2']);
+                        }
+                        break;
                 }
                 break;
         }

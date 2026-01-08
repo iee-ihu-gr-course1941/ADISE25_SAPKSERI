@@ -124,6 +124,10 @@ function getgame($gameid){
     ];
 }
 
+function getWholegame($gameid){
+    #des to meta, not important
+}
+
 function getsinglecard($userid,$cardNumber){
     $cards = getcardsofplayer($userid)["cards"];
     $cardsArray = json_decode($cards, true);
@@ -216,10 +220,8 @@ function getcardsgathered($userid){
 
 #GAME MECHANICS
 function check($card, $cardonboard){
-    if(!empty($cardonboard)){    
-        if($card['value']==11){
-            return true;}
-        if($card['suit']==$cardonboard['suit'] || $card['value']==$cardonboard['value']){
+    if(!empty($cardonboard) && !empty($card)){    
+        if($card['value']==11 || $card['suit']==$cardonboard['suit'] || $card['value']==$cardonboard['value']){
             return true;
         }
     }
@@ -279,6 +281,8 @@ function throwcard($gameid, $cardNumber){
     $boardcards=getboard($gameid)["board"];
     $boardcards=json_decode($boardcards,true);
     $game=getgame($gameid);
+    $deck=$game["deckofcards"];
+    $deck=json_decode($deck, true);
     $p1=$game["p1"];
     $p2=$game["p2"];
     $pcards=getcardsofplayer($turn)["cards"];
@@ -304,12 +308,16 @@ function throwcard($gameid, $cardNumber){
         if(count($boardcards)==1 ){
             for ($i=0; $i<count($pcards);$i++){
                 if($card==$pcards[$i] && !empty($boardcards)){
-                    if($card['value']==11 && $boardcards['value']==11){
+                    if($card['value']==11 ){
                         #20 points 
-                        $cardsgathered=$cardsgathered+2;
-                        $gamepoints=$gamepoints+20;
+                        if($boardcards['value']==11){
+                            $action="we got 20 points";
+                            $cardsgathered=$cardsgathered+2;
+                            $gamepoints=$gamepoints+20;
+                        }
                     }else{
                         #10 points plz
+                        $action="we got 10 points";
                         $cardsgathered=$cardsgathered+2;
                         $gamepoints=$gamepoints+10;
                     }
@@ -319,6 +327,7 @@ function throwcard($gameid, $cardNumber){
             }
         }else{
             #pairnoume ta fila! prepei na bgaloyme to xarti apo ta fulla mas
+            $action="we gained the cards";
             array_push($boardcards, $card);
             $gamepoints=$gamepoints+calculatepoints($boardcards)["points"];
             $cardsgathered=$cardsgathered+count($boardcards);
@@ -326,9 +335,9 @@ function throwcard($gameid, $cardNumber){
         }
     }
     else{
+        $action="nothing just threw the card on the board";
         array_push($boardcards, $card);
     }
-    $wegotin="no";
     $boardcards=json_encode($boardcards);
     $pcards=json_encode($pcardsE);
     if($p1==$turn){
@@ -336,23 +345,27 @@ function throwcard($gameid, $cardNumber){
     }elseif($p2==$turn){
         updategame($gameid, $pcards, $p1, $boardcards, $gamepoints, $p2,$cardsgathered);
     }
-    if(check2($gameid)){
-        $wegotin="we got in";
-        $boardcards=json_decode($boardcards,true);
-        $gamepoints=$gamepoints+calculatepoints($boardcards)["points"];
-        $cardsgathered=$cardsgathered+count($boardcards);
-        calcplus3($gameid);
-        $boardcards=[];
-        $boardcards=json_encode($boardcards);
-        if($p1==$turn){
-            updategame($gameid, $pcards, $p2, $boardcards, $gamepoints, $p1,$cardsgathered);
-        }elseif($p2==$turn){
-            updategame($gameid, $pcards, $p1, $boardcards, $gamepoints, $p2,$cardsgathered);
+    if((count($deck)==0) && (count($pcardsE)==0)){
+        if(check2($gameid)){
+            $action="game ended, we take cards and we calculate.";
+            $boardcards=json_decode($boardcards,true);
+            $gamepoints=$gamepoints+calculatepoints($boardcards)["points"];
+            $cardsgathered=$cardsgathered+count($boardcards);
+            calcplus3($gameid);
+            $boardcards=[];
+            $boardcards=json_encode($boardcards);
+            if($p1==$turn){
+                updategame($gameid, $pcards, $p2, $boardcards, $gamepoints, $p1,$cardsgathered);
+            }elseif($p2==$turn){
+                updategame($gameid, $pcards, $p1, $boardcards, $gamepoints, $p2,$cardsgathered);
+            }
         }
     }
     return[
         "status"=>"successfully threw card",
-        "wegotin"=>$wegotin
+        "Card_we_played"=>$card,
+        "On_top_of"=>$cardonboard,
+        "action"=>$action
     ];
 }
 
@@ -440,8 +453,10 @@ function calcplus3($gameid){
     $gamedata=getgame($gameid);
     $pointcards1=json_encode(getcardsgathered($gamedata["p1"]));
     $pointcards2=json_encode(getcardsgathered($gamedata["p2"]));
-    $gamepoints1=json_encode(getgamepoints($gamedata["p1"]));
-    $gamepoints2=json_encode(getgamepoints($gamedata["p2"]));
+    $gamepoints1=getgamepoints($gamedata["p1"]);
+    $gamepoints2=getgamepoints($gamedata["p2"]);
+    $gamepoints1=$gamepoints1["gamepoints"];
+    $gamepoints2=$gamepoints2["gamepoints"];
     if($pointcards1>$pointcards2){
         $gamepoints1=$gamepoints1+3;
         updategamepoints($gamedata["p1"],$gamepoints1);
