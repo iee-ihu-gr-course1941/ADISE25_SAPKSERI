@@ -1,6 +1,6 @@
 # The Dry Peaks API (Ξερή)
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
+![Version](https://img.shields.io/badge/version-1.0.1-blue.svg)
 ![PHP](https://img.shields.io/badge/PHP-8.2-purple.svg)
 ![MySQL](https://img.shields.io/badge/MySQL-8.0-orange.svg)
 
