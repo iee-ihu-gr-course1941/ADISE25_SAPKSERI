@@ -5,7 +5,6 @@ require_once "libraries/dbpassagg.php";
 require_once "libraries/game.php";
 require_once "libraries/match.php";
 require_once "libraries/user.php";
-# CHECK check() once again, do we need it ???
 header('Content-Type: application/json');
 $method=$_SERVER['REQUEST_METHOD'];
 $path_info = isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : '';

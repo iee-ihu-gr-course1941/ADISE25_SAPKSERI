@@ -9,7 +9,7 @@ function createuser($username,$pword){
     $st->bind_param("sss", $userid,$username, $pword);
     $st->execute();
     return [
-        "status" => "successfully created user" ,
+        "status" => "INSERT_SUCCESS" ,
         "userid"=>$userid
     ];
 }
@@ -21,7 +21,7 @@ function deleteuser($userid){
     $st->bind_param("s", $userid);
     $st->execute();
     return[
-        "status"=>"user deleted",
+        "status"=>"DELETE_SUCCESS",
         "deleted_user"=>$userid
     ];
 }
@@ -95,6 +95,7 @@ function getuserStats($userid){
 
 function getuserHistory($userid){
     #check if we are goint to do it
+    
 }
 
 function checkCredentials($username, $password){
@@ -108,7 +109,8 @@ function checkCredentials($username, $password){
         if($row && $row['pword']===$password){
             $user=getuserStats($row["Userid"]);
             return [
-                "status"=>true,
+                "status"=>"CHECK_SUCCESS",
+                "result"=>true,
                 "userid"=>$row["Userid"],
                 "username" => $user['username'],
                 "in_game_state" => $user['in_game_state'],
@@ -117,7 +119,8 @@ function checkCredentials($username, $password){
         }
     }
     return [
-        "status"=>false
+        "status"=>"CHECK_FAIL",
+        "result"=>false
     ];
 }
 ?>

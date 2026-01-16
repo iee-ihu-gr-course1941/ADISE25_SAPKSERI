@@ -22,12 +22,9 @@ function creategame($usr1, $usr2){
     $st = $mysqli->prepare($sql);
     $st->bind_param("isss",$in_game_state,$p1cards,$gameid, $userid1);
     $st->execute();
-    $sql = "UPDATE user SET in_game_state=?, gamecards=?, gameid=? WHERE Userid=?;";
-    $st = $mysqli->prepare($sql);
-    $st->bind_param("isss", $in_game_state,$p2cards,$gameid, $userid2);
-    $st->execute();
     return[
-        "gameid"=>$gameid
+        "gameid"=>$gameid,
+        "player2cards"=>$p2cards
     ];
 }
 
@@ -35,7 +32,7 @@ function resetgame($gameid, $usr1, $usr2){
     endgame($gameid);
     return[
         "gameid"=>creategame($usr1,$usr2),
-        "status"=>"game reseted"
+        "status"=>"RESET_SUCCESS"
     ];
 }
 
@@ -62,20 +59,20 @@ function finishgame($gameid){
     $st->bind_param("sssisis", $log_id, $gameid, $user1, $points1, $user2, $points2, $winner);
     $st->execute();
     return [
-        "status" => "successfully finished game" ,
+        "status" => "UPDATE_SUCCESS" ,
         "winner"=>$winner
     ];
 }
 
 function endgame($gameid){
-    #(did it but chekc again)kanoume delete to game kai ta xartia kai allazoume to state toy kathe paixti
+    #(did it but check again)kanoume delete to game kai ta xartia kai allazoume to state toy kathe paixti
     global $mysqli;
     $sql = "DELETE FROM game WHERE gameid=?";
     $st = $mysqli->prepare($sql);
     $st->bind_param("s", $gameid);
     $st->execute();
     return[
-        "status"=>"game succesfully has ended"
+        "status"=>"DELETE_SUCCESS"
     ];
 }
 
@@ -90,7 +87,7 @@ function updategame($gameid, $cards, $turn, $boardcards, $gamepoints,$userid,$ca
     $st->bind_param("siiss", $cards,$gamepoints,$cardsgathered,$gameid,$userid);
 	$st->execute();
     return[
-        "status"=>"succesfully updated the game"
+        "status"=>"UPDATE_SUCCESS"
     ];
 }
 
@@ -101,7 +98,7 @@ function updategamepoints($userid,$gamepoints){
     $st->bind_param("is", $gamepoints,$userid);
 	$st->execute();
     return[
-        "status"=>"succesfully updated the gamepoints"
+        "status"=>"UPDATE_SUCCESS"
     ];
 }
 
@@ -290,6 +287,7 @@ function throwcard($gameid, $cardNumber){
     $card=getsinglecard($turn,$cardNumber);
     $card=$card['card'];
     $cardsgathered=getcardsgathered($turn)["cardsgathered"];
+    $status="PLAYING";
     #really important
     if(!empty($boardcards)){
         $cardonboard=$boardcards[0];
@@ -310,20 +308,20 @@ function throwcard($gameid, $cardNumber){
                     if($card["value"]==11){
                         #20 points 
                         if($boardcards[0]["value"]==11){
-                            $action="we got 20 points";
+                            $action="DRY_20";
                             $cardsgathered=$cardsgathered+2;
                             $gamepoints=$gamepoints+20;
                         }
                     }else{
                         #10 points plz
-                        $action="we got 10 points";
+                        $action="DRY_10";
                         $cardsgathered=$cardsgathered+2;
                         $gamepoints=$gamepoints+10;
                     }
                     $boardcards=[];
                     break;
                 }else{
-                    $action="we gained the cards";
+                    $action="GAINED_CARDS";
                     array_unshift($boardcards, $card);
                     $gamepoints=$gamepoints+calculatepoints($boardcards)["points"];
                     $cardsgathered=$cardsgathered+count($boardcards);
@@ -332,14 +330,14 @@ function throwcard($gameid, $cardNumber){
             }
         }else{
             #pairnoume ta fila! prepei na bgaloyme to xarti apo ta fulla mas
-            $action="we gained the cards";
+            $action="GAINED_CARDS";
             array_unshift($boardcards, $card);
             $gamepoints=$gamepoints+calculatepoints($boardcards)["points"];
             $cardsgathered=$cardsgathered+count($boardcards);
             $boardcards=[];
         }
     }else{
-        $action="nothing just threw the card on the board";
+        $action="NO_ACTION";
         array_unshift($boardcards, $card);
     }
     $boardcards=json_encode($boardcards);
@@ -352,7 +350,8 @@ function throwcard($gameid, $cardNumber){
     if((count($pcardsE)==0)){
         if(check2($gameid)){
             if(count($deck)==0){
-                $action="game ended, we take cards and we calculate.";
+                $action="GAINED_CARDS";
+                $status="GAME_OVER";
                 $boardcards=json_decode($boardcards,true);
                 $gamepoints=$gamepoints+calculatepoints($boardcards)["points"];
                 $cardsgathered=$cardsgathered+count($boardcards);
@@ -366,12 +365,13 @@ function throwcard($gameid, $cardNumber){
                 }
                 finishgame($gameid);
             }else{
+                $status="ROUND_ENDED";
                 RoundShareCards($gameid);
             }
         }
     }
     return[
-        "status"=>"successfully threw card",
+        "status"=>$status,
         "Card_we_played"=>$card,
         "On_top_of"=>$cardonboard,
         "action"=>$action
@@ -470,13 +470,13 @@ function calcplus3($gameid){
         $gamepoints1=$gamepoints1+3;
         updategamepoints($gamedata["p1"],$gamepoints1);
         return[
-            "status"=>"successfully added the 3 points"
+            "status"=>"3_POINTS"
         ];
     }elseif($pointcards2>$pointcards1){
         $gamepoints2=$gamepoints2+3;
         updategamepoints($gamedata["p2"],$gamepoints2);
         return[
-            "status"=>"successfully added the 3 points"
+            "status"=>"3_POINTS"
         ];
     }
 }
