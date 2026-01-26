@@ -1,6 +1,7 @@
 <?php 
 require_once "conn.php"; 
 require "user.php";
+
 #CREATE/RESET/END/UPDATE    
 
 function creategame($usr1, $usr2){
