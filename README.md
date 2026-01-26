@@ -21,6 +21,7 @@
   {
     "gameid":"0123456789"
   }
+```
 και το backend θα μας επιστέψει πάλι json με τα στοιχεία τα οποία ζητήσαμε:
 ```json 
   {
@@ -31,7 +32,7 @@
         "deckofcards" :"{json with deck of cards}",
         "boardofcards" :"{jason with deck of cards}"
   }
-
+```
 ## Τεχνολογίες
 
 * **Backend:** PHP 
