@@ -68,13 +68,13 @@
 
 **conn.php:** Συνδέει το php αρχείο μας με την mysql βάση και για να επιτύχουμε σύνδεση χρείαζόμαστε ένα αρχείο 'dbpassag.php' το οποίο περιέχει τα credentials.
 ```php
-  <?php 
+<?php 
   $DB_USER ='';
   $DB_PASS ='';
   $DB_SOCKET ='';
   $DB='';
   $DB_PORT=;
-  ?>
+?>
 ```
 **match.php:** Βρίσκονται οι συναρτήσεις που θα χρειαστεί το front end για να εισχωρίσει τον χρήστη σε ουρα παιχνιδιου εύρεσης αντιπάλου. Το μόνο που χρειάζεται να χρησιμοποιηθεί απο το αρχείο αυτό είναι η συνάρτηση inqueue($userid) που "κανονίζει" τα πάντα, δηλαδή μόλις καλεστεί η συνάρτηση τότε ψάχνουμε να βρούμε άλλους παίχτες στην ουρά. Αν υπάρχουν τότε η συναρτηση μας γυρίζει status "GAME_JOINED" και το game id που μόλις συνδέθηκε, αλλιώς δημιουργούμε παιχνίδι και επιστρέφουμε status "GAME_CREATED" και το game id που μόλις δημιουργήθηκε. Εφόσον το παιχνίδι δημιουργείται πριν βρεθεί δεύτερος παιχτης, οι κάρτες του αποθηκεύνται στην βάση μας και θα τις χρησιμοποιούμε όταν συνδέεται και ο 2ος παίχτης.
 
@@ -120,36 +120,36 @@
 και η συνάρτηση θα επιστρέψει:
 ```json 
 {
-    "status": "PLAYING",
-    "Card_we_played": {
-        "suit": "hearts",
-        "rank": "9",
-        "value": 9
-    },
-    "On_top_of": {
-        "suit": "spades",
-        "rank": "2",
-        "value": 2
-    },
-    "action": "NO_ACTION"
+  "status": "PLAYING",
+  "Card_we_played": {
+    "suit": "hearts",
+    "rank": "9",
+    "value": 9
+  },
+  "On_top_of": {
+    "suit": "spades",
+    "rank": "2",
+    "value": 2
+  },
+  "action": "NO_ACTION"
 }
 ```
 * Μετά απο κάθε κίνηση για λόγους ασφάλειας θα είναι καλύτερο να καλέστεί η συνάρτηση change token ώστε να αλλάξει το token του παίχτη που επρόκειται να παίξει.
 * Όταν θα τελειώσει το παιχνίδι η συνάρτηση throwcard() επιστρέφει status "GAME_OVER":
 ```json 
 {
-    "status": "GAME_OVER",
-    "Card_we_played": {
-        "suit": "diamonds",
-        "rank": "King",
-        "value": 13
-    },
-    "On_top_of": {
-        "suit": "hearts",
-        "rank": "3",
-        "value": 3
-    },
-    "action": "GAINED_CARDS"
+  "status": "GAME_OVER",
+  "Card_we_played": {
+    "suit": "diamonds",
+    "rank": "King",
+    "value": 13
+  },
+  "On_top_of": {
+    "suit": "hearts",
+    "rank": "3",
+    "value": 3
+  },
+  "action": "GAINED_CARDS"
 }
 ```
 * Μπορούν να εμφανιστούν τα αποτελέσματα του παιχνιδιού με την κλήση GET (/TheDryPeaks.php/game/results) όπου επιστρέφεται το log:
