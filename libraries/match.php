@@ -1,7 +1,6 @@
 <?php 
 #matchmaking
 function inqueue($userid){
-    global $mysqli;
     $match=findMatch($userid);
     return[
         "status"=>$match["status"],

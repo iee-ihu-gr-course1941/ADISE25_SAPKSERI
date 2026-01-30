@@ -158,8 +158,8 @@ switch($method){
                         echo json_encode($data);
                         break;
                     case 'throwcard':
-                        if(isset($input['gameid']) && isset($input['number'])){
-                            $data=throwcard($input['gameid'],$input['number']);
+                        if(isset($input['gameid']) && isset($input['number']) && isset($input['token'])){
+                            $data=throwcard($input['gameid'],$input['number'],$input['token']);
                             echo json_encode($data);
                         }else {
                             http_response_code(400);
@@ -225,6 +225,15 @@ switch($method){
                     case 'checkCred':
                         if(isset($input['username']) && isset($input['password'])){
                             $data = checkCredentials($input['username'],$input['password']);
+                            echo json_encode($data);
+                        }else {
+                            http_response_code(400);
+                            echo json_encode(['error' => 'Missing user id to get game id#2']);
+                        }
+                        break;
+                    case 'login':
+                        if(isset($input['userid'])){
+                            $data = loginT($input['userid']);
                             echo json_encode($data);
                         }else {
                             http_response_code(400);

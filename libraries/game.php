@@ -272,9 +272,17 @@ function sharecards(){
     ];
 }
 
-function throwcard($gameid, $cardNumber){
+function throwcard($gameid, $cardNumber,$token){
     global $mysqli;
+    $action="ERROR";
     $turn=getturn($gameid)["turn"];
+    $tokenized=getIDbyToken($token);
+    if(!($tokenized["userid"]===$turn && $tokenized["gameid"]===$gameid)){
+        return[
+            "status"=>"CHEATER",
+            "action"=>$action
+        ];
+    }
     $boardcards=getboard($gameid)["board"];
     $boardcards=json_decode($boardcards,true);
     $game=getgame($gameid);
@@ -303,31 +311,29 @@ function throwcard($gameid, $cardNumber){
         }
     }
     if (check($card, $cardonboard)){
-        if(count($boardcards)==1 ){
-            for ($i=0; $i<count($pcards);$i++){
-                if($card==$pcards[$i]){
-                    if($card["value"]==11){
-                        #20 points 
-                        if($boardcards[0]["value"]==11){
-                            $action="DRY_20";
-                            $cardsgathered=$cardsgathered+2;
-                            $gamepoints=$gamepoints+20;
-                        }
-                    }else{
-                        #10 points plz
-                        $action="DRY_10";
+        if(count($boardcards)==1){
+            if($card['suit']==$cardonboard['suit'] || $card['value']==$cardonboard['value']){
+                $action="DRY";
+                if($card["value"]==11){
+                    #20 points 
+                    if($boardcards[0]["value"]==11){
+                        $action="DRY_20";
                         $cardsgathered=$cardsgathered+2;
-                        $gamepoints=$gamepoints+10;
+                        $gamepoints=$gamepoints+20;
                     }
-                    $boardcards=[];
-                    break;
                 }else{
+                    #10 points plz
+                    $action="DRY_10";
+                    $cardsgathered=$cardsgathered+2;
+                    $gamepoints=$gamepoints+10;
+                }
+                $boardcards=[];
+            }else{
                     $action="GAINED_CARDS";
                     array_unshift($boardcards, $card);
                     $gamepoints=$gamepoints+calculatepoints($boardcards)["points"];
                     $cardsgathered=$cardsgathered+count($boardcards);
                     $boardcards=[];
-                }
             }
         }else{
             #pairnoume ta fila! prepei na bgaloyme to xarti apo ta fulla mas

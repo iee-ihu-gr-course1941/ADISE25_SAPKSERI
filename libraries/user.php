@@ -30,7 +30,7 @@ function getIn_game_state($userid){
     global $mysqli;
     $sql = "SELECT in_game_state FROM user WHERE Userid=? ";
     $st = $mysqli->prepare($sql);
-    $st->bind_param("i", $userid);
+    $st->bind_param("s", $userid);
     $st->execute();
     $result = $st->get_result();
     $row = $result->fetch_assoc();  
@@ -43,7 +43,7 @@ function getusername($userid){
     global $mysqli;
     $sql = "SELECT username FROM user WHERE Userid=? ";
     $st = $mysqli->prepare($sql);
-    $st->bind_param("i", $userid);
+    $st->bind_param("s", $userid);
     $st->execute();
     $result = $st->get_result();
     $row = $result->fetch_assoc();  
@@ -56,7 +56,7 @@ function getpoints($userid){
     global $mysqli;
     $sql = "SELECT points FROM user WHERE Userid=? ";
     $st = $mysqli->prepare($sql);
-    $st->bind_param("i", $userid);
+    $st->bind_param("s", $userid);
     $st->execute();
     $result = $st->get_result();
     $row = $result->fetch_assoc();  
@@ -69,7 +69,7 @@ function getUsersGameID($userid){
     global $mysqli;
     $sql = "SELECT gameid FROM user WHERE Userid=? ";
     $st = $mysqli->prepare($sql);
-    $st->bind_param("i", $userid);
+    $st->bind_param("s", $userid);
     $st->execute();
     $result = $st->get_result();
     $row = $result->fetch_assoc();  
@@ -82,7 +82,7 @@ function getuserStats($userid){
     global $mysqli;
     $sql = "SELECT username, in_game_state, points FROM user WHERE Userid=? ";
     $st = $mysqli->prepare($sql);
-    $st->bind_param("i", $userid);
+    $st->bind_param("s", $userid);
     $st->execute();
     $result = $st->get_result();
     $row = $result->fetch_assoc();  
@@ -121,6 +121,35 @@ function checkCredentials($username, $password){
     return [
         "status"=>"CHECK_FAIL",
         "result"=>false
+    ];
+}
+
+function loginT($userid){
+    global $mysqli;
+    $token=uniqid();
+    $sql = "UPDATE user SET token=? WHERE Userid=?;";
+    $st = $mysqli->prepare($sql);
+    $st->bind_param("ss", $token, $userid);
+    $st->execute();
+    return [
+        "status" => "TOKENIZED" ,
+        "userid"=>$userid,
+        "token"=>$token
+    ];
+}
+
+function getIDbyToken($token){
+    global $mysqli;
+    $sql = "SELECT Userid, gameid FROM user WHERE token=? ";
+    $st = $mysqli->prepare($sql);
+    $st->bind_param("s", $token);
+    $st->execute();
+    $result = $st->get_result();
+    $row = $result->fetch_assoc();  
+    return [
+        "userid" => $row['Userid'],
+        "gameid" => $row['gameid'],
+        "token"=>$token
     ];
 }
 ?>
