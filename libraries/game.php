@@ -1,6 +1,6 @@
 <?php 
 require_once "conn.php"; 
-require "user.php";
+require_once "user.php";
 
 #CREATE/RESET/END/UPDATE    
 

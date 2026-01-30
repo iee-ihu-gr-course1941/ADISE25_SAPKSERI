@@ -5,6 +5,7 @@ require_once "libraries/dbpassagg.php";
 require_once "libraries/game.php";
 require_once "libraries/match.php";
 require_once "libraries/user.php";
+require_once "status.php";
 header('Content-Type: application/json');
 $method=$_SERVER['REQUEST_METHOD'];
 $path_info = isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : '';
@@ -138,6 +139,18 @@ switch($method){
                         break;
                 }
                 break;
+            case 'status':
+                switch($request[1]){
+                    case 'status':
+                         if(isset($input['token'])){
+                            $data = getStatus($input['token']);
+                            echo json_encode($data);
+                        }else {
+                            http_response_code(400);
+                            echo json_encode(['error' => 'Missing token']);
+                        }
+                        break;
+                }
         }
         break;
     case 'POST':
