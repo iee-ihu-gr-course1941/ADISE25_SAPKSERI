@@ -240,6 +240,15 @@ switch($method){
                             echo json_encode(['error' => 'Missing user id to get game id#2']);
                         }
                         break;
+                    case 'logout':
+                        if(isset($input['userid'])){
+                            $data = logout($input['userid']);
+                            echo json_encode($data);
+                        }else {
+                            http_response_code(400);
+                            echo json_encode(['error' => 'Missing user id to get game id#2']);
+                        }
+                        break;    
                 }
         }
         break;

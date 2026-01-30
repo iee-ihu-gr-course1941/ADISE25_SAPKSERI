@@ -138,6 +138,19 @@ function loginT($userid){
     ];
 }
 
+function logout($userid){
+    global $mysqli;
+    $sql = "UPDATE user SET token=NULL WHERE Userid=?;";
+    $st = $mysqli->prepare($sql);
+    $st->bind_param("s", $userid);
+    $st->execute();
+    return [
+        "status" => "LOG_OUT_SUCCESS",
+        "userid"=>$userid,
+        "token"=>$token
+    ];
+}
+
 function getIDbyToken($token){
     global $mysqli;
     $sql = "SELECT Userid, gameid FROM user WHERE token=? ";
@@ -152,4 +165,5 @@ function getIDbyToken($token){
         "token"=>$token
     ];
 }
+
 ?>
