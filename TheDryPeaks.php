@@ -78,6 +78,15 @@ switch($method){
                             echo json_encode(['error' => 'Missing user id to get game points']);
                         }
                         break;
+                    case 'results':
+                        if(isset($input['gameid'])){
+                            $data = getResults($input['gameid']);
+                            echo json_encode($data);
+                        }else {
+                            http_response_code(400);
+                            echo json_encode(['error' => 'Missing user id to get game points']);
+                        }
+                        break;
                 }
                 break;
             case 'user':
@@ -243,6 +252,15 @@ switch($method){
                     case 'logout':
                         if(isset($input['userid'])){
                             $data = logout($input['userid']);
+                            echo json_encode($data);
+                        }else {
+                            http_response_code(400);
+                            echo json_encode(['error' => 'Missing user id to get game id#2']);
+                        }
+                        break;
+                    case 'changetoken':
+                        if(isset($input['gameid'])){
+                            $data = changeToken($input['gameid']);
                             echo json_encode($data);
                         }else {
                             http_response_code(400);

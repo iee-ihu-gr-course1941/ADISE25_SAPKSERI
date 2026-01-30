@@ -122,8 +122,23 @@ function getgame($gameid){
     ];
 }
 
-function getWholegame($gameid){
-    #des to meta, not important
+function getResults($gameid){
+    global $mysqli;
+    $sql = "SELECT * FROM log_game_file WHERE game_id=?";
+    $st = $mysqli->prepare($sql);
+    $st->bind_param("s", $gameid);
+    $st->execute();
+    $result = $st->get_result();
+    $row = $result->fetch_assoc();
+    return [
+        "log_id" => $row['log_id'],
+        "time_stamp" => $row['time_stamp'],
+        "user_1_id" => $row['user_1_id'],
+        "user_1_score" => $row['user_1_score'],
+        "user_2_id" => $row['user_2_id'],
+        "user_2_score" => $row['user_2_score'],
+        "winner" => $row['winner']
+    ];
 }
 
 function getsinglecard($userid,$cardNumber){
@@ -173,6 +188,28 @@ function getturn($gameid){
     $result = $st->get_result();
     $row = $result->fetch_assoc();  
     return [
+        "turn" => $row['turn'] 
+    ];
+}
+
+function changeToken($gameid){
+    global $mysqli;
+    $sql = "SELECT turn FROM game WHERE gameid=? ";
+    $st = $mysqli->prepare($sql);
+    $st->bind_param("i", $gameid);
+    $st->execute();
+    $result = $st->get_result();
+    $row = $result->fetch_assoc();
+    $userid=$row['turn'];
+    $token=uniqid();
+    $sql = "UPDATE user SET token=? WHERE Userid=?;";
+    $st = $mysqli->prepare($sql);
+    $st->bind_param("ss", $token, $userid);
+    $st->execute();
+    return [
+        "status" => "TOKENIZED",
+        "userid"=>$userid,
+        "token"=>$token,
         "turn" => $row['turn'] 
     ];
 }
